@@ -4,28 +4,9 @@ import React, { FC, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { HiOutlineMenuAlt3, HiOutlineUserCircle } from "react-icons/hi";
-import { ThemeSwitcher } from "../utils/theme-switcher";
-
-// Placeholder nav items
-const NavItems = ({
-  activeItem,
-  isMobile,
-}: {
-  activeItem: number;
-  isMobile: boolean;
-}) => (
-  <div className={isMobile ? "flex flex-col p-4" : "flex space-x-6"}>
-    <Link href="/" className="text-black dark:text-white">
-      Home
-    </Link>
-    <Link href="/courses" className="text-black dark:text-white">
-      Courses
-    </Link>
-    <Link href="/about" className="text-black dark:text-white">
-      About
-    </Link>
-  </div>
-);
+import ThemeSwitcher from "../utils/theme-switcher";
+import { NavItems } from "../utils/NavItems";
+import { motion } from "framer-motion";
 
 const avatarPlaceholder = "/assets/avatardefault.jpg";
 
@@ -38,75 +19,70 @@ type Props = {
 };
 
 const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
-  const [active, setActive] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
 
-  // Sticky header on scroll
+  // Sticky Header Handler
   useEffect(() => {
-    const handleScroll = () => setActive(window.scrollY > 85);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const scrollHandler = () => setIsSticky(window.scrollY > 70);
+    window.addEventListener("scroll", scrollHandler);
+    return () => window.removeEventListener("scroll", scrollHandler);
   }, []);
 
-  const handleCloseSidebar = (e: React.MouseEvent<HTMLDivElement>) => {
-    if ((e.target as HTMLDivElement).id === "screen") setOpenSidebar(false);
-  };
-
-  // Placeholder user session (replace with actual session logic)
+  // Fake user session for now
   const userData = null;
 
   return (
-    <div className="w-full relative z-50">
-      {/* Sticky header */}
+    <header className="w-full fixed top-0 left-0 z-50">
+      {/* Top Header */}
       <div
-        className={`${
-          active
-            ? "bg-white dark:bg-black shadow-xl border-b dark:border-[#ffffff1c] fixed top-0 left-0 right-0 h-20 transition duration-500"
-            : "bg-transparent dark:bg-black border-b dark:border-[#ffffff1c] fixed top-0 left-0 right-0 h-20"
-        }`}
+        className={`transition-all duration-300
+          ${
+            isSticky
+              ? "backdrop-blur-xl bg-white/70 dark:bg-black/60 shadow-lg border-b border-gray-200/30 dark:border-gray-700/30"
+              : "bg-transparent dark:bg-black"
+          }
+        `}
       >
-        <div className="w-[95%] max-w-[1200px] mx-auto h-20 flex items-center justify-between px-3">
+        <div className="w-[95%] max-w-[1250px] mx-auto h-20 flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
-            className="text-[25px] font-Poppins font-medium text-black dark:text-white"
+            className="text-[26px] font-semibold text-black dark:text-white tracking-wide"
           >
             ELearning
           </Link>
 
-          {/* Desktop navigation + actions */}
-          <div className="flex items-center">
-            <div className="hidden 800px:flex">
-              <NavItems activeItem={activeItem} isMobile={false} />
-            </div>
+          {/* Desktop Nav Items */}
+          <NavItems activeItem={activeItem} />
 
-            {/* Theme toggle */}
+          {/* Right Section */}
+          <div className="flex items-center gap-3">
+            {/* Theme Switch */}
             <ThemeSwitcher />
 
-            {/* Mobile menu icon */}
-            <div className="800px:hidden ml-2">
+            {/* Mobile Menu - hidden on md and above */}
+            <div className="md:hidden">
               <HiOutlineMenuAlt3
-                size={28}
-                className="cursor-pointer dark:text-white text-black"
+                size={30}
+                className="cursor-pointer text-black dark:text-white"
                 onClick={() => setOpenSidebar(true)}
               />
             </div>
 
-            {/* User avatar or login icon */}
+            {/* Avatar or Login Icon */}
             {userData ? (
-              <Link href="/profile">
-                <Image
-                  src={avatarPlaceholder}
-                  alt="avatar"
-                  width={30}
-                  height={30}
-                  className="w-8 h-8 rounded-full ml-4 cursor-pointer"
-                />
-              </Link>
+              <Image
+                src={avatarPlaceholder}
+                alt="avatar"
+                width={38}
+                height={38}
+                className="rounded-full cursor-pointer"
+              />
             ) : (
               <HiOutlineUserCircle
-                size={28}
-                className="ml-4 cursor-pointer dark:text-white text-black"
+                size={30}
+                className="cursor-pointer text-black dark:text-white"
                 onClick={() => setOpen(true)}
               />
             )}
@@ -114,41 +90,47 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
         </div>
       </div>
 
-      {/* Mobile sidebar */}
+      {/* Mobile Sidebar */}
       {openSidebar && (
         <div
-          className="fixed w-full h-screen top-0 left-0 z-50 bg-black bg-opacity-30"
-          onClick={handleCloseSidebar}
-          id="screen"
+          onClick={() => setOpenSidebar(false)}
+          className="fixed inset-0 bg-black/40 z-50"
         >
-          <div className="w-[70%] h-full fixed right-0 top-0 bg-white dark:bg-slate-900 dark:bg-opacity-90 p-4">
-            <NavItems activeItem={activeItem} isMobile={true} />
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 18 }}
+            className="absolute right-0 top-0 h-full w-[70%] bg-white dark:bg-[#0f0f0f] p-6"
+          >
+            <NavItems isMobile activeItem={activeItem} />
 
-            {userData ? (
-              <Link href="/profile">
+            {/* Avatar or Login */}
+            <div className="mt-8">
+              {userData ? (
                 <Image
                   src={avatarPlaceholder}
                   alt="avatar"
-                  width={30}
-                  height={30}
-                  className="w-8 h-8 rounded-full mt-4"
+                  width={40}
+                  height={40}
+                  className="rounded-full"
                 />
-              </Link>
-            ) : (
-              <HiOutlineUserCircle
-                size={28}
-                className="mt-4 cursor-pointer dark:text-white text-black"
-                onClick={() => setOpen(true)}
-              />
-            )}
+              ) : (
+                <HiOutlineUserCircle
+                  size={32}
+                  className="cursor-pointer text-black dark:text-white"
+                  onClick={() => setOpen(true)}
+                />
+              )}
+            </div>
 
-            <p className="mt-8 text-black dark:text-white text-sm">
-              Copyright ©️ 2025 ELearning
+            <p className="mt-10 text-sm text-gray-600 dark:text-gray-400">
+              © 2025 ELearning
             </p>
-          </div>
+          </motion.div>
         </div>
       )}
-    </div>
+    </header>
   );
 };
 
