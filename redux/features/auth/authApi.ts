@@ -22,6 +22,7 @@ export const authApi = apiSlice.injectEndpoints({
         body: credentials,
       }),
     }),
+
     signup: builder.mutation<{ user: User; token: string }, SignupPayload>({
       query: (data) => ({
         url: "/auth/signup",
@@ -29,11 +30,23 @@ export const authApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
-    verifyAccount: builder.mutation<{ message: string }, { token: string }>({
-      query: ({ token }) => ({
+
+    verifyAccount: builder.mutation<
+      { message: string },
+      { activation_token: string; activation_code: string }
+    >({
+      query: ({ activation_token, activation_code }) => ({
         url: "/auth/verify",
         method: "POST",
-        body: { token },
+        body: { activation_token, activation_code },
+      }),
+    }),
+
+    //  NEW: loadUser endpoint
+    loadUser: builder.query<{ user: User }, void>({
+      query: () => ({
+        url: "/auth/me",
+        method: "GET",
       }),
     }),
   }),
@@ -43,4 +56,5 @@ export const {
   useLoginMutation,
   useSignupMutation,
   useVerifyAccountMutation,
+  useLoadUserQuery,
 } = authApi;

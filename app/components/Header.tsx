@@ -11,6 +11,7 @@ import CustomModel from "../utils/CustomModel";
 import Login from "../auth/Login";
 import SignUP from "../auth/SignUP";
 import Verification from "../auth/Verification";
+import { useLoadUserQuery } from "../../redux/features/auth/authApi";
 
 const avatarPlaceholder = "/assets/avatardefault.jpg";
 
@@ -26,6 +27,9 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
   const [isSticky, setIsSticky] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
 
+  // Fetch user from RTK Query
+  const { data: userData, isLoading } = useLoadUserQuery();
+
   // Sticky Header
   useEffect(() => {
     const scrollHandler = () => setIsSticky(window.scrollY > 70);
@@ -33,9 +37,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
     return () => window.removeEventListener("scroll", scrollHandler);
   }, []);
 
-  const userData = null;
-
-  // Placeholder refetch (remove or define it properly)
+  // Placeholder refetch
   const refetch = () => {};
 
   return (
@@ -70,7 +72,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
                 />
               </div>
 
-              {userData ? (
+              {userData?.user ? (
                 <Image
                   src={avatarPlaceholder}
                   alt="avatar"
@@ -82,7 +84,10 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
                 <HiOutlineUserCircle
                   size={30}
                   className="cursor-pointer text-black dark:text-white"
-                  onClick={() => setOpen(true)}
+                  onClick={() => {
+                    setRoute("Login");
+                    setOpen(true);
+                  }}
                 />
               )}
             </div>
@@ -104,7 +109,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
             >
               <NavItems isMobile activeItem={activeItem} />
               <div className="mt-8">
-                {userData ? (
+                {userData?.user ? (
                   <Image
                     src={avatarPlaceholder}
                     alt="avatar"
@@ -116,7 +121,10 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
                   <HiOutlineUserCircle
                     size={32}
                     className="cursor-pointer text-black dark:text-white"
-                    onClick={() => setOpen(true)}
+                    onClick={() => {
+                      setRoute("Login");
+                      setOpen(true);
+                    }}
                   />
                 )}
               </div>
