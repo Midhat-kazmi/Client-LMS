@@ -13,19 +13,26 @@ interface SignupPayload {
   avatar?: string;
 }
 
+interface SignupResponse {
+  user: User;
+  token: string;
+  activationToken: string;
+  activationCode: string;
+}
+
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation<{ user: User; token: string }, LoginPayload>({
       query: (credentials) => ({
-        url: "/auth/login",
+        url: "/api/v1/user/login",
         method: "POST",
         body: credentials,
       }),
     }),
 
-    signup: builder.mutation<{ user: User; token: string }, SignupPayload>({
+    signup: builder.mutation<SignupResponse, SignupPayload>({
       query: (data) => ({
-        url: "/auth/signup",
+        url: "/api/v1/user/register",
         method: "POST",
         body: data,
       }),
@@ -33,23 +40,23 @@ export const authApi = apiSlice.injectEndpoints({
 
     verifyAccount: builder.mutation<
       { message: string },
-      { activation_token: string; activation_code: string }
+      { activation_code: string; activation_token?: string }
     >({
-      query: ({ activation_token, activation_code }) => ({
-        url: "/auth/verify",
+      query: ({ activation_code, activation_token }) => ({
+        url: "/api/v1/user/activate-user",
         method: "POST",
-        body: { activation_token, activation_code },
+        body: { activation_code, activation_token },
       }),
     }),
 
-    //  NEW: loadUser endpoint
     loadUser: builder.query<{ user: User }, void>({
       query: () => ({
-        url: "/auth/me",
+        url: "/api/v1/user/me",
         method: "GET",
       }),
     }),
   }),
+  overrideExisting: true,
 });
 
 export const {
