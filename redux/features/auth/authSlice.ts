@@ -10,6 +10,7 @@ export interface User {
 interface AuthState {
   user: User | null;
   token: string | null;
+  activationToken: string | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -17,6 +18,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   token: null,
+  activationToken: null,
   isLoading: false,
   error: null,
 };
@@ -31,9 +33,13 @@ const authSlice = createSlice({
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
     },
+    setActivationToken: (state, action: PayloadAction<string>) => {
+      state.activationToken = action.payload;
+    },
     logout: (state) => {
       state.user = null;
       state.token = null;
+      state.activationToken = null;
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
@@ -44,5 +50,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setToken, logout, setLoading, setError } = authSlice.actions;
+export const { setUser, setToken, setActivationToken, logout, setLoading, setError } =
+  authSlice.actions;
+
 export default authSlice.reducer;

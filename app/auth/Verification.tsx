@@ -1,140 +1,94 @@
 "use client";
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import { useVerifyAccountMutation } from "../../redux/features/auth/authApi";
-import { styles } from "../styles/style";
-import { toast } from "react-hot-toast";
-import { VscWorkspaceTrusted } from "react-icons/vsc";
-import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
 
 type Props = {
   setRoute: (route: string) => void;
 };
 
-type VerifyNumber = {
-  0: string;
-  1: string;
-  2: string;
-  3: string;
-  4: string;
-  5: string;
-};
+const schema = Yup.object().shape({
+  activationCode: Yup.string()
+    .length(6, "Activation code must be 6 digits")
+    .required("Please enter the activation code"),
+});
 
 const Verification: FC<Props> = ({ setRoute }) => {
-  const [invalidError, setInvalidError] = useState<boolean>(false);
-  const { token } = useSelector((state: any) => state.auth);
-  const [verifyAccount, { isSuccess, error }] = useVerifyAccountMutation();
+  const [verifyAccount, { isLoading }] = useVerifyAccountMutation();
+  const [error, setError] = useState("");
 
-  const inputRefs = Array.from({ length: 6 }, () => useRef<HTMLInputElement>(null));
+  const formik = useFormik({
+    initialValues: { activationCode: "" },
+    validationSchema: schema,
+    onSubmit: async (values) => {
+      setError("");
+      try {
+        const activationToken = localStorage.getItem("activationToken");
+        if (!activationToken) {
+          setError("No activation token found. Please sign up again.");
+          return;
+        }
 
-  const [verifyNumber, setVerifyNumber] = useState<VerifyNumber>({
-    0: "",
-    1: "",
-    2: "",
-    3: "",
-    4: "",
-    5: "",
+        await verifyAccount({
+          activation_token: activationToken,
+          activation_code: values.activationCode,
+        }).unwrap();
+
+        toast.success("Account activated successfully!");
+        localStorage.removeItem("activationToken");
+        setRoute("Login");
+      } catch (err: any) {
+        setError(err?.data?.message || "Activation failed. Try again.");
+      }
+    },
   });
 
-  // Handle API response
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success("Account Activated Successfully!");
-      setRoute("Login");
-    }
-    if (error && "data" in error) {
-      toast.error((error as any).data.message);
-      setInvalidError(true);
-    }
-  }, [isSuccess, error, setRoute]);
-
-  // Handle OTP verification
-  const verificationHandler = async () => {
-    const verificationCode = Object.values(verifyNumber).join("");
-    if (verificationCode.length !== 6 || Object.values(verifyNumber).some((v) => v === "")) {
-      setInvalidError(true);
-      return;
-    }
-    if (!token) {
-      toast.error("Activation token missing. Please resend OTP.");
-      return;
-    }
-
-    await verifyAccount({
-      activation_code: verificationCode,
-      activation_token: token,
-    });
-  };
-
-  // Handle input change and focus
-  const handleInputChange = (index: number, value: string) => {
-    if (!/^\d?$/.test(value)) return; // allow only single digit numbers
-
-    setInvalidError(false);
-    const newVerifyNumber = { ...verifyNumber, [index]: value };
-    setVerifyNumber(newVerifyNumber);
-
-    if (value && index < inputRefs.length - 1) {
-      inputRefs[index + 1].current?.focus();
-    }
-  };
-
-  // Handle backspace to move focus backward
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !verifyNumber[index as keyof VerifyNumber] && index > 0) {
-      inputRefs[index - 1].current?.focus();
-    }
-  };
+  const { errors, touched, values, handleChange, handleSubmit } = formik;
 
   return (
-    <div>
-      <h1 className={`${styles.title}`}>Verify Your Account</h1>
-      <br />
-      <div className="w-full flex items-center justify-center mt-2">
-        <div className="w-20 h-20 rounded-full bg-[#497DF2] flex items-center justify-center">
-          <VscWorkspaceTrusted size={30} />
+    <div className="w-full max-w-md mx-auto mt-20 p-6 border rounded-lg shadow-md">
+      <h1 className="text-2xl font-bold text-center mb-4 text-purple-600">Account Verification</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Activation Code</label>
+          <input
+            type="text"
+            name="activationCode"
+            placeholder="Enter 6-digit code"
+            value={values.activationCode}
+            onChange={handleChange}
+            className={`mt-1 block w-full px-3 py-2 border ${
+              errors.activationCode && touched.activationCode ? "border-red-500" : "border-gray-300"
+            } rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
+          />
+          {errors.activationCode && touched.activationCode && (
+            <p className="text-red-500 text-sm mt-1">{errors.activationCode}</p>
+          )}
         </div>
-      </div>
-      <br />
-      <br />
-      <div className="m-auto flex items-center justify-around">
-        {Object.keys(verifyNumber).map((key, index) => {
-          const k = key as keyof VerifyNumber; // <-- fix TypeScript key issue
-          return (
-            <input
-              key={k}
-              type="text"
-              inputMode="numeric"
-              pattern="\d*"
-              maxLength={1}
-              ref={inputRefs[index]}
-              value={verifyNumber[k]}
-              onChange={(e) => handleInputChange(index, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
-              className={`w-[65px] h-[65px] bg-transparent border-[3px] rounded-[10px] flex items-center text-black dark:text-white justify-center text-[18px] font-Poppins outline-none text-center ${
-                invalidError
-                  ? "shake border-red-500"
-                  : "dark:border-white border-[#0000004a]"
-              }`}
-            />
-          );
-        })}
-      </div>
-      <br />
-      <div className="w-full flex justify-center">
-        <button className={`${styles.button}`} onClick={verificationHandler}>
-          Verify OTP
-        </button>
-      </div>
-      <br />
-      <h5 className="text-center pt-4 font-Poppins text-[14px] text-black dark:text-white">
-        Go Back to sign in?
-        <span
-          className="text-[#2190ff] pl-1 cursor-pointer"
-          onClick={() => setRoute("Login")}
+
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition"
         >
-          SignIn
-        </span>
-      </h5>
+          {isLoading ? "Verifying..." : "Verify Account"}
+        </button>
+
+        <p className="text-center text-sm mt-4">
+          Didn't receive the code?{" "}
+          <span
+            className="text-purple-600 font-semibold cursor-pointer"
+            onClick={() => setRoute("SignUp")}
+          >
+            Resend
+          </span>
+        </p>
+      </form>
     </div>
   );
 };

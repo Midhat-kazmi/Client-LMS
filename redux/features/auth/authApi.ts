@@ -16,8 +16,8 @@ interface SignupPayload {
 interface SignupResponse {
   user: User;
   token: string;
-  activationToken: string;
-  activationCode: string;
+  activation_token: string;  // FIXED
+  activation_code: string;   // FIXED
 }
 
 export const authApi = apiSlice.injectEndpoints({
@@ -40,7 +40,7 @@ export const authApi = apiSlice.injectEndpoints({
 
     verifyAccount: builder.mutation<
       { message: string },
-      { activation_code: string; activation_token?: string }
+      { activation_code: string; activation_token: string }
     >({
       query: ({ activation_code, activation_token }) => ({
         url: "/api/v1/user/activate-user",
