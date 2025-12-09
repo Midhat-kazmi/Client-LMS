@@ -13,7 +13,9 @@ import SignUP from "../auth/SignUP";
 import Verification from "../auth/Verification";
 import { useLoadUserQuery } from "../../redux/features/auth/authApi";
 
-const avatarPlaceholder = "/assets/avatardefault.jpg";
+// Placeholder avatar if user has no avatar
+const avatarPlaceholder =
+  "https://res.cloudinary.com/dgve6ewpr/image/upload/v1764923919/users/q4kpl1cjacubpmvmppmw.jpg";
 
 type Props = {
   activeItem: number;
@@ -28,7 +30,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
   const [openSidebar, setOpenSidebar] = useState(false);
 
   // Fetch user from RTK Query
-  const { data: userData, isLoading } = useLoadUserQuery();
+  const { data: userData } = useLoadUserQuery();
 
   // Sticky Header
   useEffect(() => {
@@ -37,8 +39,9 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
     return () => window.removeEventListener("scroll", scrollHandler);
   }, []);
 
-  // Placeholder refetch
   const refetch = () => {};
+
+  const userAvatar = userData?.user?.avatar?.url || avatarPlaceholder;
 
   return (
     <>
@@ -64,6 +67,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
             <div className="flex items-center gap-3">
               <ThemeSwitcher />
 
+              {/* Mobile Menu Button */}
               <div className="md:hidden">
                 <HiOutlineMenuAlt3
                   size={30}
@@ -72,14 +76,16 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
                 />
               </div>
 
+              {/* User Avatar or Login Icon */}
               {userData?.user ? (
-                <Image
-                  src={avatarPlaceholder}
-                  alt="avatar"
-                  width={38}
-                  height={38}
-                  className="rounded-full cursor-pointer"
-                />
+                <div className="w-10 h-10 relative rounded-full overflow-hidden cursor-pointer">
+                  <Image
+                    src={userAvatar}
+                    alt="avatar"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
               ) : (
                 <HiOutlineUserCircle
                   size={30}
@@ -108,15 +114,17 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
               className="absolute right-0 top-0 h-full w-[70%] bg-white dark:bg-[#0f0f0f] p-6"
             >
               <NavItems isMobile activeItem={activeItem} />
+
               <div className="mt-8">
                 {userData?.user ? (
-                  <Image
-                    src={avatarPlaceholder}
-                    alt="avatar"
-                    width={40}
-                    height={40}
-                    className="rounded-full"
-                  />
+                  <div className="w-10 h-10 relative rounded-full overflow-hidden cursor-pointer">
+                    <Image
+                      src={userAvatar}
+                      alt="avatar"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 ) : (
                   <HiOutlineUserCircle
                     size={32}
@@ -137,7 +145,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
         )}
       </header>
 
-      {/* Modals */}
+      {/* LOGIN MODAL */}
       {route === "Login" && open && (
         <CustomModel
           open={open}
@@ -149,6 +157,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
         />
       )}
 
+      {/* SIGNUP MODAL */}
       {route === "Sign-Up" && open && (
         <CustomModel
           open={open}
@@ -159,6 +168,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
         />
       )}
 
+      {/* VERIFICATION MODAL */}
       {route === "verification" && open && (
         <CustomModel
           open={open}
