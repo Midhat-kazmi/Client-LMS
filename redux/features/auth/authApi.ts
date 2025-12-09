@@ -53,6 +53,8 @@ export const authApi = apiSlice.injectEndpoints({
       query: () => ({
         url: "/api/v1/user/me",
         method: "GET",
+       credentials: "include",   
+
       }),
     }),
   }),

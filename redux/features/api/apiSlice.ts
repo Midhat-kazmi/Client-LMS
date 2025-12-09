@@ -5,6 +5,7 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000",
+    credentials: "include",  // 🔥 REQUIRED FOR COOKIES
     prepareHeaders: (headers) => {
       // Add auth token if needed
       const token = localStorage.getItem("token");
@@ -17,5 +18,3 @@ export const apiSlice = createApi({
   tagTypes: ["User", "Courses"],
   endpoints: (builder) => ({}),
 });
-
-export const { useLazyQuery, useQuery, useMutation } = apiSlice;
