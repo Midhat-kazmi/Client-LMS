@@ -61,7 +61,7 @@ export const authApi = apiSlice.injectEndpoints({
     logout: builder.query<{ message: string }, void>({
       query: () => ({
         url: "/api/v1/user/logout",
-        method: "GET",
+        method: "POST",
         credentials: "include",
       }),
     }),
@@ -72,7 +72,7 @@ export const authApi = apiSlice.injectEndpoints({
       { oldPassword: string; newPassword: string }
     >({
       query: (body) => ({
-        url: "/api/v1/user/update-password",
+        url: "/api/v1/user/update-user-password",
         method: "PUT",
         body,
         credentials: "include",

@@ -1,10 +1,9 @@
 "use client";
 import React, { FC, useEffect, useState } from "react";
 import SideBarProfile from "./SideBarProfile";
-import { signOut } from "next-auth/react";
 import ProfileInfo from "./ProfileInfo";
 import ChangePassword from "./ChangePassword";
-import { useGetUsersAllCoursesQuery } from "@/redux/features/courses/courseApi";
+import { useGetAllCourseQuery } from "@/redux/features/courses/courseApi";
 import CourseCard from "../Courses/CourseCard";
 import Loader from "../Loader/Loader";
 import { motion } from "framer-motion";
@@ -16,35 +15,46 @@ type Props = { user: any };
 
 const Profile: FC<Props> = ({ user }) => {
   const [scroll, setScroll] = useState(false);
-  const [avatar] = useState(null);
+  const [avatar] = useState<string | null>(null);
   const [active, setActive] = useState(1);
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [mobileSidebar, setMobileSidebar] = useState(false);
 
-  const { data, isLoading } = useGetUsersAllCoursesQuery();
+  const { data, isLoading } = useGetAllCourseQuery();
   const dispatch = useDispatch();
 
   // Logout handler
   const logOutHandler = async () => {
     try {
-      await signOut({ redirect: false });
-      dispatch(logoutAction());
-      setMobileSidebar(false);
-      window.location.href = "/";
+      const res = await fetch("http://localhost:5000/api/v1/user/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        dispatch(logoutAction());
+        setMobileSidebar(false);
+        window.location.href = "/";
+      } else {
+        console.error("Logout failed:", result.message);
+      }
     } catch (err) {
-      console.error("Logout failed", err);
+      console.error("Logout error:", err);
     }
   };
 
-  // Scroll sticky
+  // Sticky scroll effect
   useEffect(() => {
-    setScroll(window.scrollY > 85);
     const scrollHandler = () => setScroll(window.scrollY > 85);
+    setScroll(window.scrollY > 85);
     window.addEventListener("scroll", scrollHandler);
     return () => window.removeEventListener("scroll", scrollHandler);
   }, []);
 
-  // Load courses
+  // Load user courses
   useEffect(() => {
     if (data && user) {
       const filtered = user.courses
