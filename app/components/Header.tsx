@@ -13,7 +13,7 @@ import SignUP from "../auth/SignUP";
 import Verification from "../auth/Verification";
 import { useLoadUserQuery } from "../../redux/features/auth/authApi";
 
-// Placeholder avatar if user has no avatar
+// Placeholder avatar
 const avatarPlaceholder =
   "https://res.cloudinary.com/dgve6ewpr/image/upload/v1764923919/users/q4kpl1cjacubpmvmppmw.jpg";
 
@@ -29,10 +29,9 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
   const [isSticky, setIsSticky] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
 
-  // Fetch user from RTK Query
   const { data: userData } = useLoadUserQuery();
 
-  // Sticky Header
+  // Sticky header
   useEffect(() => {
     const scrollHandler = () => setIsSticky(window.scrollY > 70);
     window.addEventListener("scroll", scrollHandler);
@@ -61,13 +60,13 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
               ELearning
             </Link>
 
-            {/* Desktop Nav */}
+            {/* Desktop Navigation */}
             <NavItems activeItem={activeItem} />
 
             <div className="flex items-center gap-3">
               <ThemeSwitcher />
 
-              {/* Mobile Menu Button */}
+              {/* Mobile menu icon */}
               <div className="md:hidden">
                 <HiOutlineMenuAlt3
                   size={30}
@@ -76,16 +75,18 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
                 />
               </div>
 
-              {/* User Avatar or Login Icon */}
+              {/* User Avatar or Login Icon (Desktop) */}
               {userData?.user ? (
-                <div className="w-10 h-10 relative rounded-full overflow-hidden cursor-pointer">
-                  <Image
-                    src={userAvatar}
-                    alt="avatar"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+                <Link href="/profile">
+                  <div className="w-10 h-10 relative rounded-full overflow-hidden cursor-pointer">
+                    <Image
+                      src={userAvatar}
+                      alt="avatar"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </Link>
               ) : (
                 <HiOutlineUserCircle
                   size={30}
@@ -117,14 +118,16 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
 
               <div className="mt-8">
                 {userData?.user ? (
-                  <div className="w-10 h-10 relative rounded-full overflow-hidden cursor-pointer">
-                    <Image
-                      src={userAvatar}
-                      alt="avatar"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
+                  <Link href="/profile">
+                    <div className="w-10 h-10 relative rounded-full overflow-hidden cursor-pointer">
+                      <Image
+                        src={userAvatar}
+                        alt="avatar"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </Link>
                 ) : (
                   <HiOutlineUserCircle
                     size={32}

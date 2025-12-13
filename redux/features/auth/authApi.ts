@@ -16,12 +16,13 @@ interface SignupPayload {
 interface SignupResponse {
   user: User;
   token: string;
-  activation_token: string;  // FIXED
-  activation_code: string;   // FIXED
+  activation_token: string;
+  activation_code: string;
 }
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+
     login: builder.mutation<{ user: User; token: string }, LoginPayload>({
       query: (credentials) => ({
         url: "/api/v1/user/login",
@@ -42,10 +43,10 @@ export const authApi = apiSlice.injectEndpoints({
       { message: string },
       { activation_code: string; activation_token: string }
     >({
-      query: ({ activation_code, activation_token }) => ({
+      query: (body) => ({
         url: "/api/v1/user/activate-user",
         method: "POST",
-        body: { activation_code, activation_token },
+        body,
       }),
     }),
 
@@ -53,11 +54,33 @@ export const authApi = apiSlice.injectEndpoints({
       query: () => ({
         url: "/api/v1/user/me",
         method: "GET",
-       credentials: "include",   
-
+        credentials: "include",
       }),
     }),
+
+    logout: builder.query<{ message: string }, void>({
+      query: () => ({
+        url: "/api/v1/user/logout",
+        method: "GET",
+        credentials: "include",
+      }),
+    }),
+
+    // ⭐ FIXED UPDATE PASSWORD ENDPOINT
+    updatePassword: builder.mutation<
+      { message: string },
+      { oldPassword: string; newPassword: string }
+    >({
+      query: (body) => ({
+        url: "/api/v1/user/update-password",
+        method: "PUT",
+        body,
+        credentials: "include",
+      }),
+    }),
+
   }),
+
   overrideExisting: true,
 });
 
@@ -66,4 +89,6 @@ export const {
   useSignupMutation,
   useVerifyAccountMutation,
   useLoadUserQuery,
+  useLogoutQuery,
+  useUpdatePasswordMutation,
 } = authApi;
