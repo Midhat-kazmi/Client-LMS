@@ -16,6 +16,7 @@
     "@mui/x-data-grid": "^8.22.0",
     "@reduxjs/toolkit": "^2.11.0",
     "autoprefixer": "^10.4.22",
+    "axios": "^1.13.2",
     "clsx": "^2.1.1",
     "formik": "^2.4.9",
     "framer-motion": "^12.23.25",
