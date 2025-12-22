@@ -136,7 +136,7 @@ const Profile: FC<Props> = ({ user }) => {
 
             {courses.length === 0 && (
               <h1 className="text-center text-[18px] font-Poppins mt-6">
-                You don&apos;t have any purchased courses!
+                   Redirecting to admin dashboard...
               </h1>
             )}
           </div>

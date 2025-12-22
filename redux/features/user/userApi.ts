@@ -1,6 +1,7 @@
 import { apiSlice } from "../api/apiSlice";
 
 export const userApi = apiSlice.injectEndpoints({
+  overrideExisting: true, // REQUIRED in Next.js App Router
   endpoints: (builder) => ({
     updateAvatar: builder.mutation({
       query: (avatar) => ({
@@ -10,6 +11,7 @@ export const userApi = apiSlice.injectEndpoints({
         credentials: "include" as const,
       }),
     }),
+
     editProfile: builder.mutation({
       query: (name) => ({
         url: "update-user-info",
@@ -18,6 +20,7 @@ export const userApi = apiSlice.injectEndpoints({
         credentials: "include" as const,
       }),
     }),
+
     updatePassword: builder.mutation({
       query: ({ newPassword, oldPassword }) => ({
         url: "update-user-password",
@@ -26,6 +29,7 @@ export const userApi = apiSlice.injectEndpoints({
         credentials: "include" as const,
       }),
     }),
+
     getAllUsers: builder.query({
       query: () => ({
         url: "get-all-users",
@@ -33,6 +37,7 @@ export const userApi = apiSlice.injectEndpoints({
         credentials: "include" as const,
       }),
     }),
+
     updateUserRole: builder.mutation({
       query: ({ id, role }) => ({
         url: "update-user-role",
@@ -41,6 +46,7 @@ export const userApi = apiSlice.injectEndpoints({
         credentials: "include" as const,
       }),
     }),
+
     deleteUser: builder.mutation({
       query: (id) => ({
         url: `delete-user/${id}`,
@@ -50,6 +56,7 @@ export const userApi = apiSlice.injectEndpoints({
     }),
   }),
 });
+
 
 export const {
   useUpdateAvatarMutation,

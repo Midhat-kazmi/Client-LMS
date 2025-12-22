@@ -3,7 +3,7 @@ export const courseApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     createCourse: builder.mutation({
       query: (data) => ({
-        url: "create-course",
+        url: "/api/v1/course/create-course",
         method: "POST",
         body: data,
         credentials: "include" as const,

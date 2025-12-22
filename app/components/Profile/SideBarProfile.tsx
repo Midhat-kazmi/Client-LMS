@@ -16,8 +16,7 @@ interface SideBarProfileProps {
 const SideBarProfile: FC<SideBarProfileProps> = ({
   user,
   active,
-  avatar,
-  setActive,
+ setActive,
   logOutHandler,
 }) => {
   const menuItems = [
@@ -33,24 +32,7 @@ const SideBarProfile: FC<SideBarProfileProps> = ({
 
   return (
     <div className="flex flex-col justify-between h-[calc(100vh-4rem)] py-6 px-6 bg-white dark:bg-gray-900 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
-      {/* User Info */}
-      {user && (
-        <div className="flex flex-col items-center mb-8">
-          <img
-            src={user.avatar || avatar || "/default-avatar.png"}
-            alt="User Avatar"
-            className="w-24 h-24 rounded-full border-4 border-purple-600 object-cover"
-          />
-          <h2 className="mt-4 text-xl font-semibold text-gray-800 dark:text-gray-100 text-center">
-            {user.name}
-          </h2>
-          {user.role && (
-            <span className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {user.role === "admin" ? "Administrator" : "Student"}
-            </span>
-          )}
-        </div>
-      )}
+      
 
       {/* Menu Items */}
       <ul className="flex-1 flex flex-col gap-3">
