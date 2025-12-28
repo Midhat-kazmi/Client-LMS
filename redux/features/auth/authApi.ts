@@ -66,7 +66,7 @@ export const authApi = apiSlice.injectEndpoints({
       }),
     }),
 
-    // ⭐ FIXED UPDATE PASSWORD ENDPOINT
+    // FIXED UPDATE PASSWORD ENDPOINT
     updatePassword: builder.mutation<
       { message: string },
       { oldPassword: string; newPassword: string }

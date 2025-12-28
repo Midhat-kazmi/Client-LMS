@@ -12,6 +12,7 @@ import Login from "../auth/Login";
 import SignUP from "../auth/SignUP";
 import Verification from "../auth/Verification";
 import { useLoadUserQuery } from "../../redux/features/auth/authApi";
+import { User } from "../../redux/features/auth/authSlice";
 
 // Placeholder avatar
 const avatarPlaceholder =
@@ -29,9 +30,10 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
   const [isSticky, setIsSticky] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
 
-  const { data: userData } = useLoadUserQuery();
+  // ✅ Correct usage: do NOT cast with <UserData>
+  const { data } = useLoadUserQuery(); // data?.user will be typed as User | undefined
+  const user = data?.user;
 
-  // Sticky header
   useEffect(() => {
     const scrollHandler = () => setIsSticky(window.scrollY > 70);
     window.addEventListener("scroll", scrollHandler);
@@ -40,7 +42,19 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
 
   const refetch = () => {};
 
-  const userAvatar = userData?.user?.avatar?.url || avatarPlaceholder;
+ // Define avatar type
+type UserAvatar = string | { url: string } | undefined;
+
+const avatar = user?.avatar as UserAvatar;
+
+let userAvatar = avatarPlaceholder;
+
+if (typeof avatar === "string") {
+  userAvatar = avatar;
+} else if (avatar && "url" in avatar && typeof avatar.url === "string") {
+  userAvatar = avatar.url;
+}
+
 
   return (
     <>
@@ -75,8 +89,8 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
                 />
               </div>
 
-              {/* User Avatar or Login Icon (Desktop) */}
-              {userData?.user ? (
+              {/* User Avatar or Login Icon */}
+              {user ? (
                 <Link href="/profile">
                   <div className="w-10 h-10 relative rounded-full overflow-hidden cursor-pointer">
                     <Image
@@ -117,7 +131,7 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
               <NavItems isMobile activeItem={activeItem} />
 
               <div className="mt-8">
-                {userData?.user ? (
+                {user ? (
                   <Link href="/profile">
                     <div className="w-10 h-10 relative rounded-full overflow-hidden cursor-pointer">
                       <Image
