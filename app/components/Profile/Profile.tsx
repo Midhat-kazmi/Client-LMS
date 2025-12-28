@@ -1,35 +1,71 @@
 "use client";
 
 import React, { FC, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { motion } from "framer-motion";
+import { HiMenu } from "react-icons/hi";
+
 import SideBarProfile from "./SideBarProfile";
 import ProfileInfo from "./ProfileInfo";
 import ChangePassword from "./ChangePassword";
-import { useGetAllCourseQuery } from "@/redux/features/courses/courseApi";
 import CourseCard from "../Courses/CourseCard";
 import Loader from "../Loader/Loader";
-import { motion } from "framer-motion";
-import { HiMenu } from "react-icons/hi";
-import { useDispatch } from "react-redux";
 import { logout as logoutAction } from "@/redux/features/auth/authSlice";
+import { useGetAllCourseQuery } from "@/redux/features/courses/courseApi";
 
-type Props = {
-  user: {
-    courses?: { id: string }[];
-    [key: string]: any;
-  };
-};
+// ---------------- Types ----------------
+interface Course {
+  id: string;
+  title: string;
+  [key: string]: any;
+}
 
+interface UserCourse {
+  id: string;
+}
+
+interface User {
+  courses?: UserCourse[];
+  avatar?: string | { url: string };
+  [key: string]: any;
+}
+
+interface Props {
+  user: User;
+}
+
+// ---------------- Component ----------------
 const Profile: FC<Props> = ({ user }) => {
   const [scroll, setScroll] = useState(false);
-  const [avatar] = useState<string | null>(null);
   const [active, setActive] = useState(1);
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [mobileSidebar, setMobileSidebar] = useState(false);
 
-  const { data, isLoading, isError } = useGetAllCourseQuery();
   const dispatch = useDispatch();
 
-  /* ---------------- Logout ---------------- */
+  const { data, isLoading, isError } = useGetAllCourseQuery(undefined);
+
+  // ---------------- Sticky Sidebar ----------------
+  useEffect(() => {
+    const scrollHandler = () => setScroll(window.scrollY > 85);
+    scrollHandler();
+    window.addEventListener("scroll", scrollHandler);
+    return () => window.removeEventListener("scroll", scrollHandler);
+  }, []);
+
+
+  // ---------------- Avatar Safe Handling ----------------
+  const avatarPlaceholder =
+    "https://res.cloudinary.com/dgve6ewpr/image/upload/v1764923919/users/q4kpl1cjacubpmvmppmw.jpg";
+
+  let avatarUrl = avatarPlaceholder;
+  if (user.avatar) {
+    if (typeof user.avatar === "string") avatarUrl = user.avatar;
+    else if ("url" in user.avatar && typeof user.avatar.url === "string")
+      avatarUrl = user.avatar.url;
+  }
+
+  // ---------------- Logout ----------------
   const logOutHandler = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/v1/user/logout", {
@@ -50,45 +86,17 @@ const Profile: FC<Props> = ({ user }) => {
     }
   };
 
-  /* ---------------- Sticky Sidebar ---------------- */
-  useEffect(() => {
-    const scrollHandler = () => setScroll(window.scrollY > 85);
-    scrollHandler();
-    window.addEventListener("scroll", scrollHandler);
-    return () => window.removeEventListener("scroll", scrollHandler);
-  }, []);
-
-  /* ---------------- Load User Courses (SAFE) ---------------- */
-  useEffect(() => {
-    const allCourses = data?.course ?? [];       // fallback
-    const userCourses = user?.courses ?? [];     // fallback
-
-    if (!Array.isArray(allCourses) || !Array.isArray(userCourses)) {
-      setCourses([]);
-      return;
-    }
-
-    const filtered = userCourses
-      .map((item) => allCourses.find((c: any) => c.id === item.id))
-      .filter(Boolean);
-
-    setCourses(filtered);
-  }, [data, user]);
-
-  /* ---------------- Loading / Error ---------------- */
+  // ---------------- Loading / Error ----------------
   if (isLoading) return <Loader />;
-
-  if (isError) {
+  if (isError)
     return (
       <div className="text-center pt-32 text-red-500">
         Failed to load profile data
       </div>
     );
-  }
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 pt-24 pb-16 flex gap-6 relative">
-
       {/* Mobile Sidebar Toggle */}
       <button
         className="p-3 bg-gray-200 dark:bg-gray-800 rounded-xl fixed left-4 top-24 z-50 md:hidden"
@@ -106,7 +114,7 @@ const Profile: FC<Props> = ({ user }) => {
         <SideBarProfile
           user={user}
           active={active}
-          avatar={avatar}
+        
           setActive={setActive}
           logOutHandler={logOutHandler}
         />
@@ -128,7 +136,7 @@ const Profile: FC<Props> = ({ user }) => {
             <SideBarProfile
               user={user}
               active={active}
-              avatar={avatar}
+             
               setActive={(v) => {
                 setActive(v);
                 setMobileSidebar(false);
@@ -141,14 +149,14 @@ const Profile: FC<Props> = ({ user }) => {
 
       {/* Main Content */}
       <div className="flex-1">
-        {active === 1 && <ProfileInfo user={user} avatar={avatar} />}
+        {active === 1 && <ProfileInfo user={user} avatar={avatarUrl} />}
         {active === 2 && <ChangePassword />}
 
         {active === 3 && (
           <div className="w-full mt-4">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {courses.map((item, i) => (
-                <CourseCard key={i} item={item} isProfile />
+              {courses.map((item) => (
+                <CourseCard key={item.id} item={item} isProfile />
               ))}
             </div>
 
