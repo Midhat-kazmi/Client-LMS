@@ -3,7 +3,7 @@ import { styles } from "../styles/style";
 
 const About = () => {
   return (
-    <div className="text-black dark:text-white">
+    <div className="text-black dark:text-white mt-10">
       <br />
       <h1 className={`${styles.title} 800px:!text-[45px]`}>
         What is <span className="text-gradient">ELearning</span>?
@@ -54,7 +54,7 @@ const About = () => {
           sky&#39;s the limit.
         </p>
         <br />
-        <span className="text-[22px] font-Cursive">M TOQEER ZIA</span>
+        <span className="text-[22px] font-Cursive">Midhat</span>
         <h5 className="text-[18px] font-Poppins">
           Founder and CEO of ELearning
         </h5>

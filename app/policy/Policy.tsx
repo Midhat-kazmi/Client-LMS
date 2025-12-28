@@ -5,7 +5,7 @@ import { styles } from "../styles/style";
 const Policy = () => {
   return (
     <div>
-      <div className={`w-[95%] 800px:w-[92%] m-auto py-2 text-black dark:text-white px-3`}>
+      <div className={`w-[95%] 800px:w-[92%] m-auto py-2 text-black dark:text-white px-3 mt-20`}>
         <h1 className={`${styles.title} text-start! pt-2`}>
           Platform Terms And Conditions
         </h1>
