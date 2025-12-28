@@ -1,18 +1,19 @@
 "use client";
 import React, { useState } from "react";
-import Heading from "../../utils/Heading";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import FAQ from "../../components/Route/FAQ";
+import Heading from "../utils/Heading";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import Policy from "./Policy"
+
 
 const Page = () => {
   const [open, setOpen] = useState(false);
-  const [activeItem] = useState(4);
+  const [activeItem] = useState(3);
   const [route, setRoute] = useState("Login");
   return (
-    <div className="min-h-screen">
+    <div>
       <Heading
-        title="FAQS - ELearning"
+        title="Policy - ELearning"
         description="ELearning is a learning management system for helping programmers"
         keywords="programming,MERN"
       />
@@ -23,8 +24,7 @@ const Page = () => {
         setRoute={setRoute}
         route={route}
       />
-      <br />
-      <FAQ />
+     <Policy/>
       <Footer />
     </div>
   );

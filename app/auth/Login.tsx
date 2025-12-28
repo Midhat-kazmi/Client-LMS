@@ -40,17 +40,18 @@ const Login: FC<Props> = ({ setRoute, setOpen, refetch }) => {
 
   const { errors, handleChange, touched, values, handleSubmit } = formik;
 
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success("Login Successfully!");
-      setOpen(false);
-      refetch();
-    }
-    if (error && "data" in error) {
-      const err = error as any;
-      toast.error(err.data.message);
-    }
-  }, [isSuccess, error, setOpen, refetch]);
+useEffect(() => {
+  if (isSuccess) {
+    toast.success("Login Successfully!");
+    setOpen(false); // Header updates automatically
+  }
+
+  if (error && "data" in error) {
+    const err = error as any;
+    toast.error(err.data.message);
+  }
+}, [isSuccess, error, setOpen]);
+
 
   return (
     <div className="w-full">
@@ -79,39 +80,40 @@ const Login: FC<Props> = ({ setRoute, setOpen, refetch }) => {
         </div>
 
         {/* Password */}
-        <div className="relative">
-          <label className={styles.label}>Password</label>
+       <div className="relative">
+  <label className={styles.label}>Password</label>
 
-          <input
-            type={show ? "text" : "password"}
-            id="password"
-            value={values.password}
-            name="password"
-            onChange={handleChange}
-            placeholder="•••••••"
-            className={`${styles.input} ${
-              errors.password && touched.password ? "border-red-500" : "border-gray-300"
-            } focus:border-purple-500`}
-          />
+  <input
+    type={show ? "text" : "password"}
+    id="password"
+    value={values.password}
+    name="password"
+    onChange={handleChange}
+    placeholder="•••••••"
+    className={`${styles.input} ${
+      errors.password && touched.password ? "border-red-500" : "border-gray-300"
+    } focus:border-purple-500`}
+  />
 
-          {show ? (
-            <AiOutlineEye
-              className="absolute right-3 bottom-10 cursor-pointer text-gray-600"
-              size={22}
-              onClick={() => setShow(false)}
-            />
-          ) : (
-            <AiOutlineEyeInvisible
-              className="absolute right-3 bottom-10 cursor-pointer text-gray-600"
-              size={22}
-              onClick={() => setShow(true)}
-            />
-          )}
+  {show ? (
+    <AiOutlineEye
+      className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-600"
+      size={22}
+      onClick={() => setShow(false)}
+    />
+  ) : (
+    <AiOutlineEyeInvisible
+      className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-600"
+      size={22}
+      onClick={() => setShow(true)}
+    />
+  )}
 
-          {errors.password && touched.password && (
-            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-          )}
-        </div>
+  {errors.password && touched.password && (
+    <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+  )}
+</div>
+
 
         {/* Submit */}
         <button

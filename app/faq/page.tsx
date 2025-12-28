@@ -1,9 +1,10 @@
+
 "use client";
 import React, { useState } from "react";
-import Heading from "../../utils/Heading";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import FAQ from "../../components/Route/FAQ";
+import Heading from "../utils/Heading";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import FAQ from "../components/Route/FAQ";
 
 const Page = () => {
   const [open, setOpen] = useState(false);

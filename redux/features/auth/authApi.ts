@@ -21,24 +21,31 @@ interface SignupResponse {
 }
 
 export const authApi = apiSlice.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
-
+    // ---------------- Login ----------------
     login: builder.mutation<{ user: User; token: string }, LoginPayload>({
       query: (credentials) => ({
         url: "/api/v1/user/login",
         method: "POST",
         body: credentials,
+        credentials: "include",
       }),
+      invalidatesTags: ["User"], // mutation: ok
     }),
 
+    // ---------------- Signup ----------------
     signup: builder.mutation<SignupResponse, SignupPayload>({
       query: (data) => ({
         url: "/api/v1/user/register",
         method: "POST",
         body: data,
+        credentials: "include",
       }),
+      invalidatesTags: ["User"],
     }),
 
+    // ---------------- Verify Account ----------------
     verifyAccount: builder.mutation<
       { message: string },
       { activation_code: string; activation_token: string }
@@ -47,26 +54,32 @@ export const authApi = apiSlice.injectEndpoints({
         url: "/api/v1/user/activate-user",
         method: "POST",
         body,
+        credentials: "include",
       }),
+      invalidatesTags: ["User"],
     }),
 
+    // ---------------- Load User ----------------
     loadUser: builder.query<{ user: User }, void>({
       query: () => ({
         url: "/api/v1/user/me",
         method: "GET",
         credentials: "include",
       }),
+      providesTags: ["User"], // query provides the tag
     }),
 
-    logout: builder.query<{ message: string }, void>({
+    // ---------------- Logout ----------------
+    logout: builder.mutation<{ message: string }, void>({
       query: () => ({
         url: "/api/v1/user/logout",
         method: "POST",
         credentials: "include",
       }),
+      invalidatesTags: ["User"], // ✅ mutation invalidates tag
     }),
 
-    // ⭐ FIXED UPDATE PASSWORD ENDPOINT
+    // ---------------- Update Password ----------------
     updatePassword: builder.mutation<
       { message: string },
       { oldPassword: string; newPassword: string }
@@ -77,11 +90,9 @@ export const authApi = apiSlice.injectEndpoints({
         body,
         credentials: "include",
       }),
+      invalidatesTags: ["User"],
     }),
-
   }),
-
-  overrideExisting: true,
 });
 
 export const {
@@ -89,6 +100,6 @@ export const {
   useSignupMutation,
   useVerifyAccountMutation,
   useLoadUserQuery,
-  useLogoutQuery,
+  useLogoutMutation, 
   useUpdatePasswordMutation,
 } = authApi;
