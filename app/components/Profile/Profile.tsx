@@ -1,4 +1,5 @@
 "use client";
+
 import React, { FC, useEffect, useState } from "react";
 import SideBarProfile from "./SideBarProfile";
 import ProfileInfo from "./ProfileInfo";
@@ -11,7 +12,12 @@ import { HiMenu } from "react-icons/hi";
 import { useDispatch } from "react-redux";
 import { logout as logoutAction } from "@/redux/features/auth/authSlice";
 
-type Props = { user: any };
+type Props = {
+  user: {
+    courses?: { id: string }[];
+    [key: string]: any;
+  };
+};
 
 const Profile: FC<Props> = ({ user }) => {
   const [scroll, setScroll] = useState(false);
@@ -20,10 +26,10 @@ const Profile: FC<Props> = ({ user }) => {
   const [courses, setCourses] = useState<any[]>([]);
   const [mobileSidebar, setMobileSidebar] = useState(false);
 
-  const { data, isLoading } = useGetAllCourseQuery();
+  const { data, isLoading, isError } = useGetAllCourseQuery();
   const dispatch = useDispatch();
 
-  // Logout handler
+  /* ---------------- Logout ---------------- */
   const logOutHandler = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/v1/user/logout", {
@@ -38,33 +44,47 @@ const Profile: FC<Props> = ({ user }) => {
         dispatch(logoutAction());
         setMobileSidebar(false);
         window.location.href = "/";
-      } else {
-        console.error("Logout failed:", result.message);
       }
     } catch (err) {
       console.error("Logout error:", err);
     }
   };
 
-  // Sticky scroll effect
+  /* ---------------- Sticky Sidebar ---------------- */
   useEffect(() => {
     const scrollHandler = () => setScroll(window.scrollY > 85);
-    setScroll(window.scrollY > 85);
+    scrollHandler();
     window.addEventListener("scroll", scrollHandler);
     return () => window.removeEventListener("scroll", scrollHandler);
   }, []);
 
-  // Load user courses
+  /* ---------------- Load User Courses (SAFE) ---------------- */
   useEffect(() => {
-    if (data && user) {
-      const filtered = user.courses
-        .map((item: any) => data.course.find((c: any) => c.id === item.id))
-        .filter((c: any) => c);
-      setCourses(filtered);
+    const allCourses = data?.course ?? [];       // fallback
+    const userCourses = user?.courses ?? [];     // fallback
+
+    if (!Array.isArray(allCourses) || !Array.isArray(userCourses)) {
+      setCourses([]);
+      return;
     }
+
+    const filtered = userCourses
+      .map((item) => allCourses.find((c: any) => c.id === item.id))
+      .filter(Boolean);
+
+    setCourses(filtered);
   }, [data, user]);
 
+  /* ---------------- Loading / Error ---------------- */
   if (isLoading) return <Loader />;
+
+  if (isError) {
+    return (
+      <div className="text-center pt-32 text-red-500">
+        Failed to load profile data
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 pt-24 pb-16 flex gap-6 relative">
@@ -79,11 +99,9 @@ const Profile: FC<Props> = ({ user }) => {
 
       {/* Desktop Sidebar */}
       <div
-        className={`hidden md:block w-[260px] 
-        rounded-2xl shadow-md dark:shadow-none bg-white dark:bg-[#0f0f0f]
-        border border-gray-200 dark:border-gray-700
-        sticky ${scroll ? "top-[100px]" : "top-[140px]"}
-        h-[450px] transition-all`}
+        className={`hidden md:block w-[260px] rounded-2xl shadow-md 
+        bg-white dark:bg-[#0f0f0f] border border-gray-200 dark:border-gray-700
+        sticky ${scroll ? "top-[100px]" : "top-[140px]"} h-[450px]`}
       >
         <SideBarProfile
           user={user}
@@ -94,7 +112,7 @@ const Profile: FC<Props> = ({ user }) => {
         />
       </div>
 
-      {/* Mobile Sidebar Drawer */}
+      {/* Mobile Sidebar */}
       {mobileSidebar && (
         <div
           className="fixed inset-0 bg-black/40 z-50 md:hidden"
@@ -122,21 +140,21 @@ const Profile: FC<Props> = ({ user }) => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 bg-transparent">
+      <div className="flex-1">
         {active === 1 && <ProfileInfo user={user} avatar={avatar} />}
         {active === 2 && <ChangePassword />}
 
         {active === 3 && (
           <div className="w-full mt-4">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {courses.map((item: any, i: number) => (
+              {courses.map((item, i) => (
                 <CourseCard key={i} item={item} isProfile />
               ))}
             </div>
 
             {courses.length === 0 && (
               <h1 className="text-center text-[18px] font-Poppins mt-6">
-                   Redirecting to admin dashboard...
+                No enrolled courses found.
               </h1>
             )}
           </div>

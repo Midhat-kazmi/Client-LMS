@@ -5,7 +5,7 @@ export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     updateAvatar: builder.mutation({
       query: (avatar) => ({
-        url: "update-user-avatar",
+        url: "/api/v1/users/update-user-avatar",
         method: "PUT",
         body: { avatar },
         credentials: "include" as const,
@@ -14,7 +14,7 @@ export const userApi = apiSlice.injectEndpoints({
 
     editProfile: builder.mutation({
       query: (name) => ({
-        url: "update-user-info",
+        url: "/api/v1/users/update-user-info",
         method: "PUT",
         body: { name },
         credentials: "include" as const,
@@ -23,7 +23,7 @@ export const userApi = apiSlice.injectEndpoints({
 
     updatePassword: builder.mutation({
       query: ({ newPassword, oldPassword }) => ({
-        url: "update-user-password",
+        url: "/api/v1/users/update-user-password",
         method: "PUT",
         body: { newPassword, oldPassword },
         credentials: "include" as const,
@@ -32,7 +32,7 @@ export const userApi = apiSlice.injectEndpoints({
 
     getAllUsers: builder.query({
       query: () => ({
-        url: "get-all-users",
+        url: "/api/v1/users/get-all-users",
         method: "GET",
         credentials: "include" as const,
       }),
@@ -40,7 +40,7 @@ export const userApi = apiSlice.injectEndpoints({
 
     updateUserRole: builder.mutation({
       query: ({ id, role }) => ({
-        url: "update-user-role",
+        url: "/api/v1/users/update-user-role",
         method: "PUT",
         body: { id, role },
         credentials: "include" as const,
@@ -49,7 +49,7 @@ export const userApi = apiSlice.injectEndpoints({
 
     deleteUser: builder.mutation({
       query: (id) => ({
-        url: `delete-user/${id}`,
+        url: `/api/v1/users/delete-user/${id}`,
         method: "DELETE",
         credentials: "include" as const,
       }),

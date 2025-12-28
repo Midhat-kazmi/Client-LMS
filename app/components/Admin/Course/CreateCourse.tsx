@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import CourseInformation from "./CourseInformation";
 import CourseOptions from "./CourseOptions";
@@ -6,104 +8,121 @@ import CourseContent from "./CourseContent";
 import CoursePreview from "./CoursePreview";
 import { useCreateCourseMutation } from "../../../../redux/features/courses/courseApi";
 import toast from "react-hot-toast";
-import { redirect } from "next/navigation";
-
+import { useRouter } from "next/navigation";
 
 const CreateCourse = () => {
+  const router = useRouter();
+
   const [active, setActive] = useState(0);
+
   const [courseInfo, setCourseInfo] = useState({
     name: "",
     description: "",
     price: "",
     estimatedPrice: "",
-    categories: "",
     tags: "",
     level: "",
     demoUrl: "",
     thumbnail: "",
   });
+
   const [benefits, setBenefits] = useState([{ title: "" }]);
   const [prerequisites, setPrerequisites] = useState([{ title: "" }]);
+
   const [courseContentData, setCourseContentData] = useState([
     {
       videoUrl: "",
       title: "",
       description: "",
       videoLength: "",
-      videoSection: "untitled Section",
-      links: [
-        {
-          title: "",
-          url: "",
-        },
-      ],
+      videoSection: "Untitled Section",
+      videoPlayer: "html5",
+      links: [{ title: "", url: "" }],
       suggestion: "",
     },
   ]);
-  const [courseData, setCourseData] = useState({});
-  const [
-    createCourse,
-    { isSuccess, error, isLoading },
-  ] = useCreateCourseMutation();
-//Submits the course data to the API 
+
+  const [finalPayload, setFinalPayload] = useState<any>(null);
+
+  const [createCourse, { isSuccess, error, isLoading }] =
+    useCreateCourseMutation();
+
+  // FINAL SUBMIT TO BACKEND
   const handleCourseCreate = async () => {
-    if (!isLoading) {
-      await createCourse(courseData);
+    if (!finalPayload) {
+      toast.error("Course data is incomplete");
+      return;
     }
+
+    await createCourse(finalPayload);
   };
-  // Handling success and error notifications
+
+  // SUCCESS / ERROR HANDLING
   useEffect(() => {
     if (isSuccess) {
       toast.success("Course Created Successfully!");
-      redirect("/admin/all-course");
+      router.push("/admin/courses");
     }
-    if (error) {
-      if ("data" in error) {
-        const errorMessage = error as any;
-        toast.error(errorMessage?.data.message);
-      }
+
+    if (error && "data" in error) {
+      const err: any = error;
+      toast.error(err?.data?.message || "Something went wrong");
     }
-  }, [isSuccess, error]);
-    // Formating all course input data into Object
-  const handleSubmit = async () => {
-    //format benfits array
-    const formattedBenefits = benefits.map((benefit) => ({
-      title: benefit.title,
-    }));
-    //format prerequisites array
-    const formattedPrerequisites = prerequisites.map((prerequisite) => ({
-      title: prerequisite.title,
-    }));
-    //format course content Array
+  }, [isSuccess, error, router]);
+
+  // FORMAT + VALIDATE DATA
+  const handleSubmit = () => {
+    if (!courseContentData.length) {
+      toast.error("At least one video is required");
+      setActive(2);
+      return;
+    }
+
+    // FORMAT BENEFITS
+    const formattedBenefits = benefits
+      .filter((b) => b.title.trim() !== "")
+      .map((b) => ({ title: b.title }));
+
+    // FORMAT PREREQUISITES
+    const formattedPrerequisites = prerequisites
+      .filter((p) => p.title.trim() !== "")
+      .map((p) => ({ title: p.title }));
+
+    // FORMAT COURSE CONTENT
     const formattedCourseContentData = courseContentData.map((content) => ({
       videoUrl: content.videoUrl,
       title: content.title,
       description: content.description,
       videoLength: content.videoLength,
       videoSection: content.videoSection,
+      videoPlayer: content.videoPlayer || "html5",
       links: content.links.map((link) => ({
         title: link.title,
         url: link.url,
       })),
       suggestion: content.suggestion,
     }));
-    //Prepare our data object
-    const data = {
+
+    // FINAL PAYLOAD
+    const payload = {
       name: courseInfo.name,
       description: courseInfo.description,
-      price: courseInfo.price,
-      categories: courseInfo.categories,
-      estimatedPrice: courseInfo.estimatedPrice,
+      price: Number(courseInfo.price),
+      estimatedPrice: Number(courseInfo.estimatedPrice),
       tags: courseInfo.tags,
       thumbnail: courseInfo.thumbnail,
       level: courseInfo.level,
       demoUrl: courseInfo.demoUrl,
-      totalVideos: courseContentData.length,
+      totalVideos: formattedCourseContentData.length,
       benefits: formattedBenefits,
       prerequisites: formattedPrerequisites,
       courseData: formattedCourseContentData,
     };
-    setCourseData(data);
+
+    console.log("FINAL COURSE PAYLOAD 👉", payload);
+
+    setFinalPayload(payload);
+    setActive(3);
   };
 
   return (
@@ -117,6 +136,7 @@ const CreateCourse = () => {
             setActive={setActive}
           />
         )}
+
         {active === 1 && (
           <CourseData
             benefits={benefits}
@@ -127,6 +147,7 @@ const CreateCourse = () => {
             setActive={setActive}
           />
         )}
+
         {active === 2 && (
           <CourseContent
             courseContentData={courseContentData}
@@ -136,16 +157,18 @@ const CreateCourse = () => {
             handleSubmit={handleSubmit}
           />
         )}
+
         {active === 3 && (
           <CoursePreview
-            courseData={courseData}
+            courseData={finalPayload}
             handleCourseCreate={handleCourseCreate}
             active={active}
             setActive={setActive}
           />
         )}
       </div>
-      <div className="w-[20%] mt-[100px] h-screen fixed z-[-1] top-18 right-0  p-4">
+
+      <div className="w-[20%] mt-[100px] h-screen fixed top-18 right-0 p-4">
         <CourseOptions active={active} setActive={setActive} />
       </div>
     </div>

@@ -19,16 +19,17 @@ type Props = {
 
 const DashboardHeader: FC<Props> = ({ open, setOpen }) => {
   /*  RTK Query – filter safely here */
-  const { notifications, refetch } = useGetAllNotificationsQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-    selectFromResult: ({ data, refetch }) => ({
-      notifications:
-        data?.notifications?.filter(
-          (item: any) => item.status === "unread"
-        ) ?? [],
-      refetch,
-    }),
-  });
+ const query = useGetAllNotificationsQuery(undefined, {
+  refetchOnMountOrArgChange: true,
+});
+
+const notifications =
+  query.data?.notifications?.filter(
+    (item: any) => item.status === "unread"
+  ) ?? [];
+
+const { refetch } = query;
+
 
   const [updateNotificationStatus] =
     useUpdateNotificationStatusMutation();
