@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import Heading from "../../utils/Heading";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import FAQ from "../../components/Route/FAQ";
 
 const Page = () => {
   const [open, setOpen] = useState(false);
@@ -24,7 +23,6 @@ const Page = () => {
         route={route}
       />
       <br />
-      <FAQ />
       <Footer />
     </div>
   );
