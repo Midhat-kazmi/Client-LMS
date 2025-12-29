@@ -160,11 +160,7 @@ const Profile: FC<Props> = ({ user }) => {
               ))}
             </div>
 
-            {courses.length === 0 && (
-              <h1 className="text-center text-[18px] font-Poppins mt-6">
-                No enrolled courses found.
-              </h1>
-            )}
+           
           </div>
         )}
       </div>
