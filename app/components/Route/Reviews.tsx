@@ -7,7 +7,7 @@ const reviews = [
   {
     name: "Ayesha Siddiqui",
     rating: 4.7,
-    avatar: "https://randomuser.me/api/portraits/women/10.jpg",
+    avatar: "https://res.cloudinary.com/dgve6ewpr/image/upload/v1764922159/users/loobbzp1aajba6b3xevc.jpg",
     Profession: "Student | International Islamic University",
     comment:
       "An excellent platform that really helps students stay on track with their goals. The interface is smooth, elegant, and very intuitive, making it easy to navigate even during stressful times like exams. I particularly love the task reminders and calendar integration. It keeps everything organized in one place, so I never miss a deadline. I’ve already recommended it to several classmates, and they’re loving the experience as well.",
@@ -15,7 +15,7 @@ const reviews = [
   {
     name: "Ahmed Khan",
     rating: 4.2,
-    avatar: "https://randomuser.me/api/portraits/men/12.jpg",
+    avatar: "https://res.cloudinary.com/dgve6ewpr/image/upload/v1757455637/avatars/o34fi9rfcskaz5fuuvra.jpg",
     Profession: "Software Engineer | ZainTech",
     comment:
       "I found the features to be quite useful, especially for managing my daily tasks and work priorities. The UI is clean, responsive, and professional. It’s great for productivity, and I like how it integrates well with other tools I already use. There’s definitely room for improvement in performance speed, but overall, I’m happy with how it enhances my workflow. I’m definitely looking forward to future updates and enhancements.",
