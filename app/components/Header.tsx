@@ -1,20 +1,18 @@
 "use client";
 
-import React, { FC, useState, useEffect } from "react";
 import Link from "next/link";
+import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
 import { HiOutlineMenuAlt3, HiOutlineUserCircle } from "react-icons/hi";
-import ThemeSwitcher from "../utils/theme-switcher";
 import { NavItems } from "../utils/NavItems";
-import { motion } from "framer-motion";
+import  ThemeSwitcher  from "../utils/theme-switcher";
 import CustomModel from "../utils/CustomModel";
 import Login from "../auth/Login";
 import SignUP from "../auth/SignUP";
 import Verification from "../auth/Verification";
 import { useLoadUserQuery } from "../../redux/features/auth/authApi";
-import { User } from "../../redux/features/auth/authSlice";
 
-// Placeholder avatar
+// Placeholder avatar if user has none
 const avatarPlaceholder =
   "https://res.cloudinary.com/dgve6ewpr/image/upload/v1764923919/users/q4kpl1cjacubpmvmppmw.jpg";
 
@@ -30,34 +28,30 @@ const Header: FC<Props> = ({ activeItem, setOpen, open, route, setRoute }) => {
   const [isSticky, setIsSticky] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
 
-  // ✅ Correct usage: do NOT cast with <UserData>
-  const { data } = useLoadUserQuery(); // data?.user will be typed as User | undefined
+  // Load user dynamically from backend via RTK Query
+  const { data } = useLoadUserQuery();
   const user = data?.user;
 
+  // Dynamically select avatar
+  const userAvatar = user?.avatar?.url || avatarPlaceholder;
+
+  // Sticky header on scroll
   useEffect(() => {
-    const scrollHandler = () => setIsSticky(window.scrollY > 70);
-    window.addEventListener("scroll", scrollHandler);
-    return () => window.removeEventListener("scroll", scrollHandler);
+    const handleScroll = () => setIsSticky(window.scrollY > 70);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const refetch = () => {};
 
- // Define avatar type
-type UserAvatar = string | { url: string } | undefined;
-
-const avatar = user?.avatar as UserAvatar;
-
-let userAvatar = avatarPlaceholder;
-
-if (typeof avatar === "string") {
-  userAvatar = avatar;
-} else if (avatar && "url" in avatar && typeof avatar.url === "string") {
-  userAvatar = avatar.url;
-}
-
+  // Close sidebar when clicking outside
+  const handleClose = (e: any) => {
+    if (e.target.id === "screen") setOpenSidebar(false);
+  };
 
   return (
     <>
+      {/* Header */}
       <header className="w-full fixed top-0 left-0 z-50">
         <div
           className={`transition-all duration-300 ${
@@ -67,6 +61,7 @@ if (typeof avatar === "string") {
           }`}
         >
           <div className="w-[95%] max-w-[1250px] mx-auto h-20 flex items-center justify-between">
+            {/* Logo */}
             <Link
               href="/"
               className="text-[26px] font-semibold text-black dark:text-white tracking-wide"
@@ -118,14 +113,11 @@ if (typeof avatar === "string") {
         {/* Mobile Sidebar */}
         {openSidebar && (
           <div
-            onClick={() => setOpenSidebar(false)}
+            onClick={handleClose}
             className="fixed inset-0 bg-black/40 z-50"
+            id="screen"
           >
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 18 }}
+            <div
               className="absolute right-0 top-0 h-full w-[70%] bg-white dark:bg-[#0f0f0f] p-6"
             >
               <NavItems isMobile activeItem={activeItem} />
@@ -157,7 +149,7 @@ if (typeof avatar === "string") {
               <p className="mt-10 text-sm text-gray-600 dark:text-gray-400">
                 © 2025 ELearning
               </p>
-            </motion.div>
+            </div>
           </div>
         )}
       </header>
