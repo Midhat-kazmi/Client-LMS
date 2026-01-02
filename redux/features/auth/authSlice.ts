@@ -4,7 +4,10 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  avatar?: string;
+  avatar?: {
+    public_id: string;
+    url: string;
+  };
 }
 
 interface AuthState {
@@ -50,7 +53,13 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setToken, setActivationToken, logout, setLoading, setError } =
-  authSlice.actions;
+export const {
+  setUser,
+  setToken,
+  setActivationToken,
+  logout,
+  setLoading,
+  setError,
+} = authSlice.actions;
 
 export default authSlice.reducer;

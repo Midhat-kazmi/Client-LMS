@@ -7,13 +7,20 @@ export const apiSlice = createApi({
       process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000",
     credentials: "include",
     prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("token")
+          : null;
+
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
       }
       return headers;
     },
   }),
-  tagTypes: ["User", "Courses", "Notifications"], 
+
+  // 🔥 REQUIRED for providesTags / invalidatesTags
+  tagTypes: ["User", "Courses", "Notifications"],
+
   endpoints: () => ({}),
 });
