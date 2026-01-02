@@ -7,10 +7,10 @@ type Props = {
 };
 
 const Page = async ({ params }: Props) => {
-  const { id } = await params; //  REQUIRED in Next 15
+  const { id } = await params; 
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/course/${id}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/v1/course/single-course/${id}`,
     {
       cache: "no-store",
     }
