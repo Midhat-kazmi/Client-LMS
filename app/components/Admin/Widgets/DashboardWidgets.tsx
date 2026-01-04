@@ -47,10 +47,10 @@ const DashboardWidgets: FC<Props> = ({ open }) => {
     useGetOrdersAnalyticsQuery({});
 
   useEffect(() => {
-    // ✅ Correct loading guard
+    //  Correct loading guard
     if (isLoading || ordersLoading) return;
 
-    // ✅ Safe access with optional chaining + fallback
+    //  Safe access with optional chaining + fallback
     const usersLastTwoMonths =
       data?.users?.last12Months?.slice(-2) ?? [];
 
@@ -166,7 +166,7 @@ const DashboardWidgets: FC<Props> = ({ open }) => {
           <OrdersAnalytics isDashboard />
         </div>
         <div className="p-5">
-          <h5 className="dark:text-white text-black text-lg font-normal font-Poppins pb-3">
+          <h5 className="dark:text-white text-black text-lg font-normal font-Poppins pb-3 mt-20">
             Recent Transactions
           </h5>
           <AllInvoices isDashboard />
