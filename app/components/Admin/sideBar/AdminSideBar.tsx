@@ -187,16 +187,6 @@ const Sidebar = () => {
               setSelected={setSelected}
             />
 
-            {/* Customization Section */}
-            {!isCollapsed && (
-              <Typography className="text-sm md:text-[16px] text-gray-600 dark:text-gray-300 mt-5 mb-2">
-                Customization
-              </Typography>
-            )}
-            <Item title="Hero" to="/admin/hero" icon={<WebIcon />} selected={selected} setSelected={setSelected} />
-            <Item title="FAQ" to="/admin/faq" icon={<QuizIcon />} selected={selected} setSelected={setSelected} />
-            <Item title="Categories" to="/admin/categories" icon={<WysiwygIcon />} selected={selected} setSelected={setSelected} />
-
             {/* Controllers */}
             {!isCollapsed && (
               <Typography className="text-sm md:text-[16px] text-gray-600 dark:text-gray-300 mt-5 mb-2">
