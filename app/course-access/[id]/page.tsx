@@ -6,19 +6,25 @@ import Image from "next/image";
 import CoursePlayer from "@/app/utils/CoursePlayer";
 import { IoCheckmarkDoneOutline, IoLockClosedOutline } from "react-icons/io5";
 import { useLoadUserQuery } from "@/redux/features/auth/authApi";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+import { BsChevronDown, BsChevronUp } from "react-icons/bs";
+import { MdOutlineOndemandVideo } from "react-icons/md";
 
 type Lesson = {
   _id: string;
   title: string;
   videoUrl: string;
   isFree: boolean;
+  videoSection: string;
+  videoLength: number; // in minutes
 };
 
 type Course = {
   _id: string;
   name: string;
   description: string;
-  thumbnail: { url: string }; // added thumbnail
+  thumbnail: { url: string };
   courseData: Lesson[];
 };
 
@@ -31,13 +37,12 @@ const Page = () => {
 
   const [course, setCourse] = useState<Course | null>(null);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!courseId) return;
 
-    fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/v1/course/single-course/${courseId}`
-    )
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/course/single-course/${courseId}`)
       .then((res) => res.json())
       .then((data) => {
         setCourse(data.course);
@@ -48,91 +53,111 @@ const Page = () => {
 
   if (userLoading || !course || !currentLesson || !userData) {
     return (
-      <div className="py-20 text-center text-gray-500">
+      <div className="py-20 text-center text-gray-500 dark:text-gray-400">
         Loading course content...
       </div>
     );
   }
 
+  // Toggle section visibility for accordion
+  const toggleSection = (section: string) => {
+    const newSet = new Set(visibleSections);
+    if (newSet.has(section)) newSet.delete(section);
+    else newSet.add(section);
+    setVisibleSections(newSet);
+  };
+
+  // Group lessons by section
+  const sections = Array.from(new Set(course.courseData.map((l) => l.videoSection)));
+
   return (
-    <div className="w-[95%] mx-auto py-6 flex flex-col lg:flex-row gap-6">
+    <div className="dark:bg-[#0f0f1a] min-h-screen flex flex-col">
+      <Header activeItem={1} open={false} setOpen={() => {}} route="/" setRoute={() => {}} />
 
-      {/* LEFT SIDE */}
-      <div className="w-full lg:w-[68%] space-y-4">
+      <div className="w-[95%] mx-auto py-6 flex flex-col lg:flex-row gap-6 flex-1 mt-20">
 
-        {/* COURSE THUMBNAIL */}
-        {course.thumbnail?.url && (
-          <div className="relative w-full h-[220px] rounded-2xl overflow-hidden shadow-lg">
-            <Image
-              src={course.thumbnail.url}
-              alt={course.name}
-              fill
-              className="object-cover"
-              priority
+        {/* LEFT SIDE: Thumbnail + Video */}
+        <div className="w-full lg:w-[68%] space-y-6">
+          {course.thumbnail?.url && (
+            <div className="relative w-full h-60 rounded-2xl overflow-hidden shadow-xl hover:scale-[1.02] transition-all duration-300">
+              <Image
+                src={course.thumbnail.url}
+                alt={course.name}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
+
+          <div className="bg-white dark:bg-[#1a1a2e] rounded-2xl shadow-lg p-4 border border-purple-100 dark:border-purple-900">
+            <CoursePlayer
+              videoUrl={currentLesson.videoUrl}
+              title={currentLesson.title}
             />
           </div>
-        )}
-
-        {/* VIDEO PLAYER */}
-        <div className="bg-white dark:bg-[#0f0f1a] rounded-2xl shadow-lg p-4 border border-purple-100 dark:border-purple-900">
-          {/* ✅ currentLesson is guaranteed non-null here */}
-          <CoursePlayer
-            videoUrl={currentLesson.videoUrl}
-            title={currentLesson.title}
-          />
         </div>
-      </div>
 
-      {/* RIGHT SIDE: COURSE CONTENT */}
-      <div className="w-full lg:w-[32%] bg-white dark:bg-[#0f0f1a] rounded-2xl shadow-lg border border-purple-100 dark:border-purple-900 p-5">
+        {/* RIGHT SIDE: Accordion Lessons */}
+        <div className="w-full lg:w-[32%] bg-white dark:bg-[#1a1a2e] rounded-2xl shadow-lg border border-purple-100 dark:border-purple-900 p-6 flex flex-col">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            {course.name}
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-5">
+            {course.description}
+          </p>
 
-        {/* COURSE INFO */}
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {course.name}
-        </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 mb-4">
-          {course.description}
-        </p>
-
-        {/* LESSON LIST */}
-        <h3 className="text-lg font-semibold mb-3 text-purple-600">
-          Course Lessons
-        </h3>
-
-        <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto pr-2">
-          {course.courseData.map((lesson, index) => {
-            const isActive = currentLesson._id === lesson._id;
+          {sections.map((section) => {
+            const lessonsInSection = course.courseData.filter(l => l.videoSection === section);
+            const isVisible = visibleSections.has(section);
+            const totalMinutes = lessonsInSection.reduce((sum, l) => sum + l.videoLength, 0);
+            const totalHours = totalMinutes / 60;
 
             return (
-              <button
-                key={lesson._id}
-                onClick={() => setCurrentLesson(lesson)}
-                className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-left transition-all border
-                  ${
-                    isActive
-                      ? "bg-purple-600 text-white border-purple-600"
-                      : "bg-purple-50 dark:bg-purple-900/20 text-gray-800 dark:text-gray-200 border-purple-100 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/40"
-                  }`}
-              >
-                <div className="flex items-center gap-3">
-                  <IoCheckmarkDoneOutline
-                    className={`${isActive ? "text-white" : "text-purple-600"}`}
-                  />
-                  <span className="text-sm font-medium">
-                    {index + 1}. {lesson.title}
-                  </span>
+              <div key={section} className="mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+                {/* Section Header */}
+                <div className="flex justify-between items-center cursor-pointer" onClick={() => toggleSection(section)}>
+                  <div>
+                    <h3 className="text-lg font-semibold text-black dark:text-white">{section}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {lessonsInSection.length} Lessons · {totalMinutes < 60 ? `${totalMinutes} min` : `${totalHours.toFixed(2)} hr`}
+                    </p>
+                  </div>
+                  <div className="text-black dark:text-white">
+                    {isVisible ? <BsChevronUp /> : <BsChevronDown />}
+                  </div>
                 </div>
 
-                {!lesson.isFree && (
-                  <IoLockClosedOutline
-                    className={`${isActive ? "text-white" : "text-gray-400"}`}
-                  />
+                {/* Lessons */}
+                {isVisible && (
+                  <div className="mt-2">
+                    {lessonsInSection.map((lesson, idx) => {
+                      const isActive = currentLesson._id === lesson._id;
+                      return (
+                        <div
+                          key={lesson._id}
+                          className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                            isActive
+                              ? "bg-purple-600 text-white shadow-md"
+                              : "hover:bg-purple-50 dark:hover:bg-purple-900/20 text-black dark:text-white"
+                          }`}
+                          onClick={() => setCurrentLesson(lesson)}
+                        >
+                          <MdOutlineOndemandVideo size={20} color={isActive ? "#fff" : "#1cdada"} />
+                          <span className="flex-1 text-sm font-medium">{lesson.title}</span>
+                          {!lesson.isFree && <IoLockClosedOutline className={`${isActive ? "text-white" : "text-gray-400"}`} />}
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
-              </button>
+              </div>
             );
           })}
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
